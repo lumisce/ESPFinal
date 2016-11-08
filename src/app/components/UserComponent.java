@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.WebApplicationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import app.entities.Build;
 import app.entities.User;
+import app.repositories.BuildRepository;
 import app.repositories.UserRepository;
 
 
@@ -22,6 +25,10 @@ public class UserComponent {
 	
 	@Autowired
 	UserRepository dao;
+	
+	@Autowired
+	BuildRepository buildDao;
+	
 	@Autowired
 	PasswordEncoder passEncoder;
 	
@@ -35,8 +42,12 @@ public class UserComponent {
 		return f.format(user.getCreatedAt().getTime());
 	}
 	
-	public User findUser(String usernameOrEmail) {
-		return dao.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail);
+	public User find(String usernameOrEmail) {
+		User u =  dao.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail);
+		if (u == null) {
+			throw new WebApplicationException(404);
+		}
+		return u;
 	}
 	
 	public List<String> validate(String username, String email, String password, String confPassword) {
@@ -69,12 +80,10 @@ public class UserComponent {
 		dao.save(user);
 	}
 	
-	public List<String> authenticate(String password, User user) {
-		List<String> errors = new ArrayList<>();
-		if(user == null || !passEncoder.matches(password, user.getHashedPassword())) {
-			errors.add("Invalid Credentials");
+	public void authenticate(String password, User user) {
+		if(!passEncoder.matches(password, user.getHashedPassword())) {
+			throw new WebApplicationException(422);
 		}
-		return errors;
 	}
 	
 	public void setSession(HttpServletRequest req, String username) {
@@ -97,7 +106,23 @@ public class UserComponent {
 		return currentUser(req) != null;
 	}
 	
-	public boolean isUnauthorized(String username, HttpServletRequest req) {
-		return !isLoggedIn(req) || !isCurrentUser(username, req);
+	public void checkAuthorized(String username, HttpServletRequest req) {
+		if(!isLoggedIn(req) || !isCurrentUser(username, req)) {
+			throw new WebApplicationException(403);
+		}
+	}
+	
+	public void checkSeller(User user) {
+		if (!user.isSeller()) {
+			throw new WebApplicationException(404);
+		}
+	}
+	public void checkAdmin(User user) {
+		if (!user.isAdmin()) {
+			throw new WebApplicationException(404);
+		}
+	}
+	public List<Build> findBuilds(User user) {
+		return buildDao.findByUser(user);
 	}
 }

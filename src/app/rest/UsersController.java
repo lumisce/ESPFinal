@@ -1,7 +1,5 @@
 package app.rest;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Component;
 import app.components.UserComponent;
 import app.entities.Build;
 import app.entities.User;
-import app.repositories.BuildRepository;
 
 @Component
 @Path("/")
@@ -29,9 +26,6 @@ public class UsersController extends AppController {
 
 	@Autowired
 	UserComponent userComp;
-	
-	@Autowired
-	BuildRepository buildDao;
 	
 	@POST
 	@Path("/register")			// similar to /admin/register and /seller/register
@@ -54,11 +48,8 @@ public class UsersController extends AppController {
 	public Response login(@FormParam("username_or_email") String usernameOrEmail, 
 			@FormParam("password") String password, @Context HttpServletRequest req) {
 		
-		User user = userComp.findUser(usernameOrEmail);
-		List<String> errors = userComp.authenticate(password, user);
-		if (errors.size() > 0) {
-			return errorResponse(errors);
-		}
+		User user = userComp.find(usernameOrEmail);
+		userComp.authenticate(password, user);
 		userComp.setSession(req, user.getUsername());
 		return Response.ok().build();
 	}
@@ -71,15 +62,12 @@ public class UsersController extends AppController {
 	}
 	
 	@GET
-	@Path("/u/{username}")
+	@Path("/users/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response viewUser(@PathParam("username") String username) {
-		User user = userComp.findUser(username);
-		if (user == null) {
-			return Response.status(404).build();
-		}
+		User user = userComp.find(username);
 		
-		List<Build> builds = buildDao.findByUser(user);
+		List<Build> builds = userComp.findBuilds(user);
 		for (Build b : builds) {
 			b.setCreated(formatDate(b.getCreatedAt()));
 		}
@@ -89,13 +77,11 @@ public class UsersController extends AppController {
 	}
 	
 	@GET
-	@Path("/s/{username}")
+	@Path("/sellers/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response viewSeller(@PathParam("username") String username) {
-		User user = userComp.findUser(username);
-		if (user == null || !user.isSeller()) {
-			return Response.status(404).build();
-		}
+		User user = userComp.find(username);
+		userComp.checkSeller(user);
 		// TODO paginate parts (and maybe builds?)
 		user.setBuilds(null);
 		user.setCreated(formatDate(user.getCreatedAt()));
@@ -106,13 +92,10 @@ public class UsersController extends AppController {
 	@Path("/admin/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response viewAdmin(@PathParam("username") String username, @Context HttpServletRequest req) {
-		User user = userComp.findUser(username);
-		if (user == null || !user.isAdmin()) {
-			return Response.status(404).build();
-		}
-		if (userComp.isUnauthorized(username, req)) {
-			return Response.status(403).build();
-		}
+		User user = userComp.find(username);
+		userComp.checkAdmin(user);
+		userComp.checkAuthorized(username, req);
+		
 		user.setBuilds(null);
 		// TODO paginate accounts
 		user.setCreated(formatDate(user.getCreatedAt()));
