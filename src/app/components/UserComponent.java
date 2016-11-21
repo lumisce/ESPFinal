@@ -15,8 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import app.entities.Build;
+import app.entities.Part;
 import app.entities.User;
 import app.repositories.BuildRepository;
+import app.repositories.PartRepository;
 import app.repositories.UserRepository;
 
 
@@ -28,6 +30,9 @@ public class UserComponent {
 	
 	@Autowired
 	BuildRepository buildDao;
+	
+	@Autowired
+	PartRepository partDao;
 	
 	@Autowired
 	PasswordEncoder passEncoder;
@@ -124,5 +129,17 @@ public class UserComponent {
 	}
 	public List<Build> findBuilds(User user) {
 		return buildDao.findByUser(user);
+	}
+	
+	public List<Part> viewParts(){
+		return partDao.findAll();
+	}
+	
+	public List<User> viewAccounts(){
+		return dao.findAll();
+	}
+	
+	public User getAccount(String username){
+		return dao.findByUsername(username);
 	}
 }

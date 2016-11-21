@@ -18,7 +18,11 @@ import org.springframework.stereotype.Component;
 
 import app.components.UserComponent;
 import app.entities.Build;
+import app.entities.Part;
+import app.entities.Type;
 import app.entities.User;
+import app.repositories.PartRepository;
+import app.repositories.UserRepository;
 
 @Component
 @Path("/")
@@ -26,6 +30,12 @@ public class UsersController extends AppController {
 
 	@Autowired
 	UserComponent userComp;
+	
+	@Autowired
+	PartRepository partDAO;
+	
+	@Autowired
+	UserRepository userDAO;
 	
 	@POST
 	@Path("/register")			// similar to /admin/register and /seller/register
@@ -100,6 +110,113 @@ public class UsersController extends AppController {
 		// TODO paginate accounts
 		user.setCreated(formatDate(user.getCreatedAt()));
 		return Response.ok().entity(user).build();
+	}
+	
+	@GET
+	@Path("/parts")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Part> viewParts(@PathParam("username") String username, @Context HttpServletRequest req) {
+		User user = userComp.find(username);
+		userComp.checkAuthorized(username,req);
+		return userComp.viewParts();
+	}
+	
+	@POST
+	@Path("/sellers/{seller}/parts/new")
+	public Response newPart(@FormParam("part_name") String name, 
+			@FormParam("partPrice") Double price, @FormParam("description") String desc, 
+			@FormParam("imgPath") String imagePath, @FormParam("partType") Type type, 
+			@FormParam("username") String username, @Context HttpServletRequest req ) {
+		
+		User user = userComp.find(username);
+		userComp.checkSeller(user);
+		userComp.checkAuthorized(username, req);
+		
+		Part newPart = new Part();
+		newPart.setName(name);
+		newPart.setPrice(price);
+		newPart.setDescription(desc);
+		newPart.setImagePath(imagePath);
+		newPart.setType(type);
+		newPart.setSeller(user);
+		partDAO.save(newPart);
+		
+		return Response.ok().build();
+	}
+	
+	@POST
+	@Path("/sellers/{seller}/parts/{part}/edit")
+	public Response editPart(@FormParam("part_name") String name, 
+			@FormParam("partPrice") Double price, @FormParam("description") String desc, 
+			@FormParam("imgPath") String imagePath, @FormParam("partType") Type type, 
+			@FormParam("username") String username, @Context HttpServletRequest req ) {
+		
+		User user = userComp.find(username);
+		userComp.checkSeller(user);
+		userComp.checkAuthorized(username, req);
+		
+		Part toEdit = partDAO.findByName(name);
+		
+		if(name != null ) toEdit.setName(name);
+		if(price != null ) toEdit.setPrice(price);
+		if(desc != null ) toEdit.setDescription(desc);
+		if(imagePath != null ) toEdit.setImagePath(imagePath);
+		if(type != null ) toEdit.setType(type);
+		partDAO.save(toEdit);
+		
+		return Response.ok().build();
+	}
+	
+	@POST
+	@Path("/sellers/{seller}/parts/{part}/delete")
+	public Response deletePart(@FormParam("part_name") String name, @FormParam("username") String username, 
+			@Context HttpServletRequest req ) {
+		
+		User user = userComp.find(username);
+		userComp.checkSeller(user);
+		userComp.checkAuthorized(username, req);
+		
+		Part toEdit = partDAO.findByName(name);
+		partDAO.delete(toEdit);
+		
+		return Response.ok().build();
+	}
+	
+	@GET
+	@Path("/admin/{username}/accounts")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<User> viewAccounts(@PathParam("username") String username, @Context HttpServletRequest req) {
+		User user = userComp.find(username);
+		userComp.checkAdmin(user);
+		userComp.checkAuthorized(username, req);
+		
+		return userComp.viewAccounts();
+	}
+	
+	@GET
+	@Path("/admin/{username}/accounts/{account}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public User getAccount(@PathParam("username") String username, @FormParam("toFind") String name,
+			@Context HttpServletRequest req) {
+		User user = userComp.find(username);
+		userComp.checkAdmin(user);
+		userComp.checkAuthorized(username, req);
+	
+		return userComp.getAccount(name);
+	}
+	
+	@POST
+	@Path("/admin/{username}/accounts/{account}/delete")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deleteAccount(@PathParam("username") String username, @FormParam("toFind") String name,
+			@Context HttpServletRequest req) {
+		User user = userComp.find(username);
+		userComp.checkAdmin(user);
+		userComp.checkAuthorized(username, req);
+		
+		userDAO.delete(user);
+	
+		return Response.ok().build();
 	}
 	
 	public static class UserDto {
