@@ -21,6 +21,12 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name="build_part")
 public class BuildPart implements Serializable {
 
+	public BuildPart(Build build, Part part) {
+		super();
+		this.build = build;
+		this.part = part;
+	}
+
 	@JsonBackReference
 	@Id
 	@ManyToOne
@@ -33,7 +39,7 @@ public class BuildPart implements Serializable {
 	private Part part;
 	
 	@Column
-	private int quantity;
+	private int quantity = 1;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column

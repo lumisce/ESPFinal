@@ -26,10 +26,11 @@ public class BuildComponent {
 		return b;
 	}
 	
-	public void create(String name, User u, List<Part> parts) {
-		Build b = new Build();			// add parts
+	public Build create(String name, User u) {
+		Build b = new Build();
 		b.setName(name);
 		b.setUser(u);
 		dao.save(b);
+		return b;
 	}
 }

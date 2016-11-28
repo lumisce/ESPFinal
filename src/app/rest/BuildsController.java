@@ -18,7 +18,11 @@ import org.springframework.stereotype.Component;
 import app.components.BuildComponent;
 import app.components.UserComponent;
 import app.entities.Build;
+import app.entities.BuildPart;
+import app.entities.Part;
 import app.entities.User;
+import app.repositories.BuildRepository;
+import app.repositories.PartRepository;
 
 @Component
 @Path("/users/{username}/builds")
@@ -32,14 +36,19 @@ public class BuildsController extends AppController{
 	@Autowired
 	BuildComponent buildComp;
 	
+	@Autowired
+	PartRepository partDAO;
+	
+	@Autowired
+	BuildRepository buildDAO;
+	
 	@POST
 	@Path("/new")
 	public Response createBuild(@PathParam("username") String username, @FormParam("name") String name, @Context HttpServletRequest req) {
 		userComp.checkAuthorized(username, req);
-		
 		User u = userComp.find(username);
-		buildComp.create(name, u, new ArrayList<>());
-		return Response.ok().build();
+		Build b = buildComp.create(name, u);
+		return Response.ok(b.getId()).build();
 	}
 	
 	@GET
@@ -49,30 +58,48 @@ public class BuildsController extends AppController{
 		if (userComp.find(username) != b.getUser()) {
 			throw new WebApplicationException(404);
 		}
-		b.setCreated(formatDate(b.getCreatedAt()));
-		// TODO b.setparts
 		return Response.ok().entity(b).build();
 	}
 	
+	
+	
 	@POST
 	@Path("/{build}/edit")
-	public Response updateBuild(@PathParam("username") String username, @PathParam("build") Long build, @Context HttpServletRequest req) {
+	public Response updateBuild(@PathParam("username") String username, @PathParam("build") Long build, 
+			@FormParam("name") String name, @Context HttpServletRequest req) {
+		
 		userComp.checkAuthorized(username, req);
 		
 		Build b = buildComp.find(build);
 		if (userComp.find(username) != b.getUser()) {
 			throw new WebApplicationException(404);
 		}
-		// TODO b.setParts
+		b.setName(name);
+		return Response.ok().build();
+	}
+	
+	
+	@POST
+	@Path("{build}/addPart")
+	public Response addPartToBuild(@PathParam("username") String username, @PathParam("build") Long build, @FormParam("part_id") Long part,  @Context HttpServletRequest req) {
+		userComp.checkAuthorized(username, req);
+		
+		Build b = buildComp.find(build);
+		if (userComp.find(username) != b.getUser()) {
+			throw new WebApplicationException(404);
+		}
+		Part p = partDAO.findOne(part);
+		b.getBuildParts().add(new BuildPart(b, p));
 		return Response.ok().build();
 	}
 	
 	@POST
 	@Path("/{build}/delete")
-	public void deleteBuild(@PathParam("username") String username, @PathParam("build") Long build, @Context HttpServletRequest req) {
+	public Response deleteBuild(@PathParam("username") String username, @PathParam("build") Long build, @Context HttpServletRequest req) {
 		userComp.checkAuthorized(username, req);
-		// TODO delete build
-		// user.build.delete and build.delete?
+		
+		buildDAO.delete(build);
+		return Response.ok().build();
 	}
 	
 }
