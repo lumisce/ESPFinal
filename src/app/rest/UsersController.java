@@ -22,6 +22,7 @@ import app.entities.Part;
 import app.entities.Type;
 import app.entities.User;
 import app.repositories.PartRepository;
+import app.repositories.TypeRepository;
 import app.repositories.UserRepository;
 
 @Component
@@ -36,6 +37,9 @@ public class UsersController extends AppController {
 	
 	@Autowired
 	UserRepository userDAO;
+	
+	@Autowired
+	TypeRepository typeDAO;
 	
 	@POST
 	@Path("/register")			// similar to /admin/register and /seller/register
@@ -115,18 +119,16 @@ public class UsersController extends AppController {
 	@GET
 	@Path("/parts")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Part> viewParts(@PathParam("username") String username, @Context HttpServletRequest req) {
-		User user = userComp.find(username);
-		userComp.checkAuthorized(username,req);
+	public List<Part> viewParts(@Context HttpServletRequest req) {
 		return userComp.viewParts();
 	}
 	
 	@POST
 	@Path("/sellers/{seller}/parts/new")
-	public Response newPart(@FormParam("part_name") String name, 
-			@FormParam("partPrice") Double price, @FormParam("description") String desc, 
-			@FormParam("imgPath") String imagePath, @FormParam("partType") Type type, 
-			@FormParam("username") String username, @Context HttpServletRequest req ) {
+	public Response newPart(@PathParam("seller") String username, @FormParam("name") String name, 
+			@FormParam("price") Double price, @FormParam("description") String desc, 
+			@FormParam("img_path") String imagePath, @FormParam("type_id") Long type, 
+			@Context HttpServletRequest req ) {
 		
 		User user = userComp.find(username);
 		userComp.checkSeller(user);
@@ -137,7 +139,8 @@ public class UsersController extends AppController {
 		newPart.setPrice(price);
 		newPart.setDescription(desc);
 		newPart.setImagePath(imagePath);
-		newPart.setType(type);
+		Type t = typeDAO.findOne(type);
+		newPart.setType(t);
 		newPart.setSeller(user);
 		partDAO.save(newPart);
 		
@@ -146,22 +149,23 @@ public class UsersController extends AppController {
 	
 	@POST
 	@Path("/sellers/{seller}/parts/{part}/edit")
-	public Response editPart(@FormParam("part_name") String name, 
-			@FormParam("partPrice") Double price, @FormParam("description") String desc, 
-			@FormParam("imgPath") String imagePath, @FormParam("partType") Type type, 
-			@FormParam("username") String username, @Context HttpServletRequest req ) {
+	public Response editPart(@PathParam("seller") String username, @PathParam("part") Long id, 
+			@FormParam("price") Double price, @FormParam("description") String desc, 
+			@FormParam("img_path") String imagePath, @FormParam("type_id") Long type, 
+			@Context HttpServletRequest req ) {
 		
 		User user = userComp.find(username);
 		userComp.checkSeller(user);
 		userComp.checkAuthorized(username, req);
 		
-		Part toEdit = partDAO.findByName(name);
+		Part toEdit = partDAO.findOne(id);
 		
-		if(name != null ) toEdit.setName(name);
 		if(price != null ) toEdit.setPrice(price);
 		if(desc != null ) toEdit.setDescription(desc);
 		if(imagePath != null ) toEdit.setImagePath(imagePath);
-		if(type != null ) toEdit.setType(type);
+		
+		Type t = typeDAO.findOne(type);
+		if(type != null ) toEdit.setType(t);
 		partDAO.save(toEdit);
 		
 		return Response.ok().build();
@@ -169,14 +173,13 @@ public class UsersController extends AppController {
 	
 	@POST
 	@Path("/sellers/{seller}/parts/{part}/delete")
-	public Response deletePart(@FormParam("part_name") String name, @FormParam("username") String username, 
-			@Context HttpServletRequest req ) {
+	public Response deletePart(@PathParam("seller") String username, @PathParam("part") Long id, @Context HttpServletRequest req ) {
 		
 		User user = userComp.find(username);
 		userComp.checkSeller(user);
 		userComp.checkAuthorized(username, req);
 		
-		Part toEdit = partDAO.findByName(name);
+		Part toEdit = partDAO.findOne(id);
 		partDAO.delete(toEdit);
 		
 		return Response.ok().build();
@@ -196,7 +199,7 @@ public class UsersController extends AppController {
 	@GET
 	@Path("/admin/{username}/accounts/{account}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public User getAccount(@PathParam("username") String username, @FormParam("toFind") String name,
+	public User getAccount(@PathParam("username") String username, @PathParam("account") String name,
 			@Context HttpServletRequest req) {
 		User user = userComp.find(username);
 		userComp.checkAdmin(user);
@@ -208,7 +211,7 @@ public class UsersController extends AppController {
 	@POST
 	@Path("/admin/{username}/accounts/{account}/delete")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteAccount(@PathParam("username") String username, @FormParam("toFind") String name,
+	public Response deleteAccount(@PathParam("username") String username, @PathParam("account") String name,
 			@Context HttpServletRequest req) {
 		User user = userComp.find(username);
 		userComp.checkAdmin(user);

@@ -50,20 +50,29 @@ public class BuildsController extends AppController{
 			throw new WebApplicationException(404);
 		}
 		b.setCreated(formatDate(b.getCreatedAt()));
+		// TODO b.setparts
 		return Response.ok().entity(b).build();
 	}
 	
 	@POST
 	@Path("/{build}/edit")
-	public void updateBuild(@PathParam("username") String username, @PathParam("build") String build) {
-		// TODO update build
+	public Response updateBuild(@PathParam("username") String username, @PathParam("build") Long build, @Context HttpServletRequest req) {
+		userComp.checkAuthorized(username, req);
+		
+		Build b = buildComp.find(build);
+		if (userComp.find(username) != b.getUser()) {
+			throw new WebApplicationException(404);
+		}
+		// TODO b.setParts
+		return Response.ok().build();
 	}
 	
 	@POST
 	@Path("/{build}/delete")
-	public void deleteBuild(@PathParam("username") String username, @PathParam("build") String build) {
+	public void deleteBuild(@PathParam("username") String username, @PathParam("build") Long build, @Context HttpServletRequest req) {
+		userComp.checkAuthorized(username, req);
 		// TODO delete build
-		// user.build.delete or build.delete?
+		// user.build.delete and build.delete?
 	}
 	
 }
