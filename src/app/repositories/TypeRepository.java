@@ -8,5 +8,5 @@ import app.entities.User;
 
 @Repository
 public interface TypeRepository extends JpaRepository<Type, Long>{
-
+	Type findByName(String name);
 }
