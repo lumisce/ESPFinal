@@ -21,6 +21,7 @@ import app.entities.Build;
 import app.entities.Part;
 import app.entities.Type;
 import app.entities.User;
+import app.repositories.BuildRepository;
 import app.repositories.PartRepository;
 import app.repositories.TypeRepository;
 import app.repositories.UserRepository;
@@ -41,6 +42,9 @@ public class UsersController extends AppController {
 	@Autowired
 	TypeRepository typeDAO;
 	
+	@Autowired
+	BuildRepository buildDAO;
+	
 	@POST
 	@Path("/register")			// similar to /admin/register and /seller/register
 	public Response register(@FormParam("username") String username, @FormParam("email") String email, 
@@ -53,7 +57,7 @@ public class UsersController extends AppController {
 			return errorResponse(errors);
 		}
 		userComp.create(username, email, password, isSeller, isAdmin);
-		userComp.setSession(req, username);
+//		userComp.setSession(req, username);
 		return Response.ok().build();
 	}
 	
@@ -64,16 +68,16 @@ public class UsersController extends AppController {
 		
 		User user = userComp.find(usernameOrEmail);
 		userComp.authenticate(password, user);
-		userComp.setSession(req, user.getUsername());
-		return Response.ok().build();
+//		userComp.setSession(req, user.getUsername());
+		return Response.ok(user.getUsername()).build();
 	}
 
-	@GET
-	@Path("/logout")			// similar to /admin/login and /seller/login
-	public Response logout(@Context HttpServletRequest req) {
-		userComp.setSession(req, null);
-		return Response.ok().build();
-	}
+//	@GET
+//	@Path("/logout")			// similar to /admin/login and /seller/login
+//	public Response logout(@Context HttpServletRequest req) {
+////		userComp.setSession(req, null);
+//		return Response.ok().build();
+//	}
 	
 	@GET
 	@Path("/users/{username}")
@@ -108,12 +112,19 @@ public class UsersController extends AppController {
 	public Response viewAdmin(@PathParam("username") String username, @Context HttpServletRequest req) {
 		User user = userComp.find(username);
 		userComp.checkAdmin(user);
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 		
 		user.setBuilds(null);
 		// TODO paginate accounts
 		user.setCreated(formatDate(user.getCreatedAt()));
 		return Response.ok().entity(user).build();
+	}
+	
+	@GET
+	@Path("/builds")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Build> viewBuilds() {
+		return buildDAO.findAll();
 	}
 	
 	@GET
@@ -132,7 +143,7 @@ public class UsersController extends AppController {
 		
 		User user = userComp.find(username);
 		userComp.checkSeller(user);
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 		
 		Part newPart = new Part();
 		newPart.setName(name);
@@ -156,7 +167,7 @@ public class UsersController extends AppController {
 		
 		User user = userComp.find(username);
 		userComp.checkSeller(user);
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 		
 		Part toEdit = partDAO.findOne(id);
 		
@@ -177,7 +188,7 @@ public class UsersController extends AppController {
 		
 		User user = userComp.find(username);
 		userComp.checkSeller(user);
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 		
 		Part toEdit = partDAO.findOne(id);
 		partDAO.delete(toEdit);
@@ -191,7 +202,7 @@ public class UsersController extends AppController {
 	public List<User> viewAccounts(@PathParam("username") String username, @Context HttpServletRequest req) {
 		User user = userComp.find(username);
 		userComp.checkAdmin(user);
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 		
 		return userComp.viewAccounts();
 	}
@@ -203,7 +214,7 @@ public class UsersController extends AppController {
 			@Context HttpServletRequest req) {
 		User user = userComp.find(username);
 		userComp.checkAdmin(user);
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 	
 		return userComp.getAccount(name);
 	}
@@ -215,7 +226,7 @@ public class UsersController extends AppController {
 			@Context HttpServletRequest req) {
 		User user = userComp.find(username);
 		userComp.checkAdmin(user);
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 		
 		userDAO.delete(user);
 	

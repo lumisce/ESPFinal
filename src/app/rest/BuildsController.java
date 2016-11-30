@@ -45,7 +45,7 @@ public class BuildsController extends AppController{
 	@POST
 	@Path("/new")
 	public Response createBuild(@PathParam("username") String username, @FormParam("name") String name, @Context HttpServletRequest req) {
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 		User u = userComp.find(username);
 		Build b = buildComp.create(name, u);
 		return Response.ok(b.getId()).build();
@@ -68,7 +68,7 @@ public class BuildsController extends AppController{
 	public Response updateBuild(@PathParam("username") String username, @PathParam("build") Long build, 
 			@FormParam("name") String name, @Context HttpServletRequest req) {
 		
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 		
 		Build b = buildComp.find(build);
 		if (userComp.find(username) != b.getUser()) {
@@ -82,7 +82,7 @@ public class BuildsController extends AppController{
 	@POST
 	@Path("{build}/addPart")
 	public Response addPartToBuild(@PathParam("username") String username, @PathParam("build") Long build, @FormParam("part_id") Long part,  @Context HttpServletRequest req) {
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 		
 		Build b = buildComp.find(build);
 		if (userComp.find(username) != b.getUser()) {
@@ -96,7 +96,7 @@ public class BuildsController extends AppController{
 	@POST
 	@Path("/{build}/delete")
 	public Response deleteBuild(@PathParam("username") String username, @PathParam("build") Long build, @Context HttpServletRequest req) {
-		userComp.checkAuthorized(username, req);
+//		userComp.checkAuthorized(username, req);
 		
 		buildDAO.delete(build);
 		return Response.ok().build();

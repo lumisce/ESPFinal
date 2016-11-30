@@ -91,31 +91,31 @@ public class UserComponent {
 		}
 	}
 	
-	public void setSession(HttpServletRequest req, String username) {
-		HttpSession session = req.getSession(true);
-		session.setAttribute("username", username);
-	}
+//	public void setSession(HttpServletRequest req, String username) {
+//		HttpSession session = req.getSession(true);
+//		session.setAttribute("username", username);
+//	}
+//	
+//	public User currentUser(HttpServletRequest req) {
+//		HttpSession session = req.getSession(true);
+//		String username = (String) session.getAttribute("username");
+//		if(username == null) return null;
+//		return dao.findByUsername(username);
+//	}
+//	
+//	public boolean isCurrentUser(String username, HttpServletRequest req) {
+//		return currentUser(req).getUsername().equals(username);
+//	}
+//	
+//	public boolean isLoggedIn(HttpServletRequest req) {
+//		return currentUser(req) != null;
+//	}
 	
-	public User currentUser(HttpServletRequest req) {
-		HttpSession session = req.getSession(true);
-		String username = (String) session.getAttribute("username");
-		if(username == null) return null;
-		return dao.findByUsername(username);
-	}
-	
-	public boolean isCurrentUser(String username, HttpServletRequest req) {
-		return currentUser(req).getUsername().equals(username);
-	}
-	
-	public boolean isLoggedIn(HttpServletRequest req) {
-		return currentUser(req) != null;
-	}
-	
-	public void checkAuthorized(String username, HttpServletRequest req) {
-		if(!isLoggedIn(req) || !isCurrentUser(username, req)) {
-			throw new WebApplicationException(403);
-		}
-	}
+//	public void checkAuthorized(String username, HttpServletRequest req) {
+//		if(!isLoggedIn(req) || !isCurrentUser(username, req)) {
+//			throw new WebApplicationException(403);
+//		}
+//	}
 	
 	public void checkSeller(User user) {
 		if (!user.isSeller()) {
