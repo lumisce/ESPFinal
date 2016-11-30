@@ -55,9 +55,11 @@ public class BuildsController extends AppController{
 	@Path("/{build}")
 	public Response viewBuild(@PathParam("username") String username, @PathParam("build") Long build) {
 		Build b = buildComp.find(build);
-		if (userComp.find(username) != b.getUser()) {
-			throw new WebApplicationException(404);
-		}
+//		if (username != b.getUser().getUsername()) {
+//			throw new WebApplicationException(404);
+//		}
+		b.setCreated(formatDate(b.getCreatedAt()));
+		b.setUsername(b.getUser().getUsername());
 		return Response.ok().entity(b).build();
 	}
 	
@@ -71,11 +73,12 @@ public class BuildsController extends AppController{
 //		userComp.checkAuthorized(username, req);
 		
 		Build b = buildComp.find(build);
-		if (userComp.find(username) != b.getUser()) {
+		if (!username.equals(b.getUser().getUsername())) {
 			throw new WebApplicationException(404);
 		}
 		b.setName(name);
-		return Response.ok().build();
+		buildDAO.save(b);
+		return Response.ok(b).build();
 	}
 	
 	

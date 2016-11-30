@@ -124,7 +124,12 @@ public class UsersController extends AppController {
 	@Path("/builds")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Build> viewBuilds() {
-		return buildDAO.findAll();
+		List<Build> builds =  buildDAO.findAll();
+		for (Build b : builds) {
+			b.setCreated(formatDate(b.getCreatedAt()));
+			b.setUsername(b.getUser().getUsername());
+		}
+		return builds;
 	}
 	
 	@GET

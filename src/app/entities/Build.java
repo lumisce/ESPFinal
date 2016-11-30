@@ -44,6 +44,9 @@ public class Build {
 	@JoinColumn(name="user_id")
 	private User user;
 	
+	@Transient
+	private String username;
+	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column
 	@JsonIgnore
@@ -85,6 +88,14 @@ public class Build {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public Calendar getCreatedAt() {
