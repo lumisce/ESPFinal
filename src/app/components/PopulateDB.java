@@ -40,9 +40,12 @@ public class PopulateDB
 
 	@Autowired
 	private UserRepository userRepo;
-	
+
 	@Autowired
 	private TypeRepository typeRepo;
+
+	@Autowired
+	private UserComponent userComp;
 
 	@PostConstruct
 	public void run()
@@ -88,13 +91,14 @@ public class PopulateDB
                 try{
                 System.out.println("User="+user[0]+" Password="+user[1]+" Email="+user[2] +" isAdmin=" + user[3]);
                     
-                User u = new User();
-                u.setUsername(user[0]);
-                u.setHashedPassword(user[1]);
-                u.setEmail(user[2]);
-                u.setSeller(true);
-                u.setAdmin(user[3].equals("TRUE")? true : false);
-                userRepo.save(u);
+                
+
+        		List<String> errors = userComp.validate(user[0], user[2], user[1], user[1]);
+        		if (errors.size() > 0) {
+        			System.out.println(errors.toString());
+        		}
+        		userComp.create(user[0], user[2], user[1], true, user[3].equals("TRUE")? true : false);
+        		
                 }
                 catch(ArrayIndexOutOfBoundsException exception) {
                    break;
