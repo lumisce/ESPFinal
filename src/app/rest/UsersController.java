@@ -9,6 +9,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -135,8 +136,24 @@ public class UsersController extends AppController {
 	@GET
 	@Path("/parts")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Part> viewParts(@Context HttpServletRequest req) {
-		return userComp.viewParts();
+	public List<Part> viewParts(@QueryParam("q") String query, @QueryParam("type") Long type, @Context HttpServletRequest req) {
+		if (query.isEmpty() && type == 0) {
+			return userComp.viewParts();
+		} else if (query.isEmpty()) {
+			Type t = typeDAO.findOne(type);
+			return partDAO.findByType(t);
+		} else if (type == 0) {
+			return partDAO.findByNameLike("%"+query+"%");
+		}
+		Type t = typeDAO.findOne(type);
+		return partDAO.findByTypeAndNameLike(t, "%"+query+"%");
+	}
+	
+	@GET
+	@Path("/types")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Type> viewTypes(@Context HttpServletRequest req) {
+		return typeDAO.findAll();
 	}
 	
 	@POST
