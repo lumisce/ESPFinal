@@ -12,6 +12,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.codehaus.jackson.annotate.JsonBackReference;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonManagedReference;
 
@@ -31,7 +32,7 @@ public class Type {
 	@JsonIgnore
 	private Calendar createdAt = Calendar.getInstance();
 	
-	@JsonManagedReference
+	@JsonBackReference
 	@OneToMany(mappedBy="type")
 	private List<Part> parts;
 	

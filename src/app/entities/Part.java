@@ -44,7 +44,7 @@ public class Part {
 	@JoinColumn(name="seller_id")
 	private User seller;
 	
-	@JsonBackReference
+	@JsonManagedReference
 	@ManyToOne
 	@JoinColumn(name="type_id")
 	private Type type;
