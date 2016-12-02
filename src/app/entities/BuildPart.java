@@ -22,18 +22,19 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 public class BuildPart implements Serializable {
 
 	public BuildPart(Build build, Part part) {
-		super();
 		this.build = build;
 		this.part = part;
 	}
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Column
+	private Long id;
 
 	@JsonBackReference
-	@Id
 	@ManyToOne
 	@JoinColumn(name="build_id")
 	private Build build;
 	
-	@Id
 	@ManyToOne
 	@JoinColumn(name="part_id")
 	private Part part;

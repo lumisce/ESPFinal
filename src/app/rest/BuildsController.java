@@ -21,6 +21,7 @@ import app.entities.Build;
 import app.entities.BuildPart;
 import app.entities.Part;
 import app.entities.User;
+import app.repositories.BuildPartRepository;
 import app.repositories.BuildRepository;
 import app.repositories.PartRepository;
 
@@ -42,6 +43,9 @@ public class BuildsController extends AppController{
 	@Autowired
 	BuildRepository buildDAO;
 	
+	@Autowired
+	BuildPartRepository bpDAO;
+	
 	@POST
 	@Path("/new")
 	public Response createBuild(@PathParam("username") String username, @FormParam("name") String name, @Context HttpServletRequest req) {
@@ -55,11 +59,12 @@ public class BuildsController extends AppController{
 	@Path("/{build}")
 	public Response viewBuild(@PathParam("username") String username, @PathParam("build") Long build) {
 		Build b = buildComp.find(build);
-//		if (username != b.getUser().getUsername()) {
-//			throw new WebApplicationException(404);
-//		}
+		if (!username.equals(b.getUser().getUsername())) {
+			throw new WebApplicationException(404);
+		}
 		b.setCreated(formatDate(b.getCreatedAt()));
 		b.setUsername(b.getUser().getUsername());
+		b.setbParts(bpDAO.findByBuild(b));
 		return Response.ok().entity(b).build();
 	}
 	
@@ -88,11 +93,29 @@ public class BuildsController extends AppController{
 //		userComp.checkAuthorized(username, req);
 		
 		Build b = buildComp.find(build);
-		if (userComp.find(username) != b.getUser()) {
+		if (!username.equals(b.getUser().getUsername())) {
 			throw new WebApplicationException(404);
 		}
 		Part p = partDAO.findOne(part);
-		b.getBuildParts().add(new BuildPart(b, p));
+		BuildPart bp = new BuildPart();
+		bp.setBuild(b);
+		bp.setPart(p);
+		bpDAO.save(bp);
+		return Response.ok().build();
+	}
+	
+	@POST
+	@Path("{build}/removePart")
+	public Response removePartFromBuild(@PathParam("username") String username, @PathParam("build") Long build, @FormParam("part_id") Long part,  @Context HttpServletRequest req) {
+//		userComp.checkAuthorized(username, req);
+		
+		Build b = buildComp.find(build);
+		if (!username.equals(b.getUser().getUsername())) {
+			throw new WebApplicationException(404);
+		}
+		Part p = partDAO.findOne(part);
+		BuildPart bp = bpDAO.findByBuildAndPart(b, p);
+		bpDAO.delete(bp);
 		return Response.ok().build();
 	}
 	

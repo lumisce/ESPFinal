@@ -55,6 +55,9 @@ public class Build {
 	@Transient
 	private String created;
 	
+	@Transient
+	private List<BuildPart> bParts;
+	
 	public Build() {
 	}
 
@@ -112,5 +115,13 @@ public class Build {
 
 	public void setCreated(String created) {
 		this.created = created;
+	}
+
+	public List<BuildPart> getbParts() {
+		return bParts;
+	}
+
+	public void setbParts(List<BuildPart> bParts) {
+		this.bParts = bParts;
 	}
 }
