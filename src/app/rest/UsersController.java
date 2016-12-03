@@ -57,6 +57,8 @@ public class UsersController extends AppController {
 		if (errors.size() > 0) {
 			return errorResponse(errors);
 		}
+		isSeller = true;
+		isAdmin = false;
 		userComp.create(username, email, password, isSeller, isAdmin);
 //		userComp.setSession(req, username);
 		return Response.ok().build();
