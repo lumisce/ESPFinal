@@ -15,4 +15,5 @@ public interface PartRepository extends JpaRepository<Part, Long>{
 	List<Part> findByNameLike(String name);
 	List<Part> findByType(Type t);
 	List<Part> findByTypeAndNameLike(Type t, String name);
+	List<Part> findBySeller(User user);
 }

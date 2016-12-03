@@ -67,7 +67,7 @@ public class UsersController extends AppController {
 	@POST
 	@Path("/login")			// similar to /admin/login and /seller/login
 	public Response login(@FormParam("username_or_email") String usernameOrEmail, 
-			@FormParam("password") String password, @Context HttpServletRequest req) {
+			@FormParam("password") String password) {
 		
 		User user = userComp.find(usernameOrEmail);
 		userComp.authenticate(password, user);
@@ -162,8 +162,7 @@ public class UsersController extends AppController {
 	@Path("/sellers/{seller}/parts/new")
 	public Response newPart(@PathParam("seller") String username, @FormParam("name") String name, 
 			@FormParam("price") Double price, @FormParam("description") String desc, 
-			@FormParam("img_path") String imagePath, @FormParam("type_id") Long type, 
-			@Context HttpServletRequest req ) {
+			@FormParam("img_path") String imagePath, @FormParam("type_id") Long type) {
 		
 		User user = userComp.find(username);
 		userComp.checkSeller(user);
@@ -180,6 +179,17 @@ public class UsersController extends AppController {
 		partDAO.save(newPart);
 		
 		return Response.ok().build();
+	}
+	
+	@GET
+	@Path("/sellers/{seller}/parts")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Part> viewMyParts(@PathParam("seller") String username) {
+		User user = userComp.find(username);
+		userComp.checkSeller(user);
+		
+		List<Part> myParts = partDAO.findBySeller(user);
+		return myParts;
 	}
 	
 	@POST
