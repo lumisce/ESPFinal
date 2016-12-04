@@ -15,6 +15,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import app.components.UserComponent;
@@ -126,8 +129,9 @@ public class UsersController extends AppController {
 	@GET
 	@Path("/builds")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Build> viewBuilds() {
-		List<Build> builds =  buildDAO.findAll();
+	public List<Build> viewBuilds(@QueryParam("page") int page) {
+		Pageable pg = new PageRequest(page, 25);
+		List<Build> builds =  buildDAO.findAll(pg).getContent();
 		for (Build b : builds) {
 			b.setCreated(formatDate(b.getCreatedAt()));
 			b.setUsername(b.getUser().getUsername());
@@ -138,17 +142,19 @@ public class UsersController extends AppController {
 	@GET
 	@Path("/parts")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Part> viewParts(@QueryParam("q") String query, @QueryParam("type") Long type, @Context HttpServletRequest req) {
+	public List<Part> viewParts(@QueryParam("q") String query, @QueryParam("type") Long type, @QueryParam("page") int page, @Context HttpServletRequest req) {
+		Pageable pg = new PageRequest(page, 25);
 		if (query.isEmpty() && type == 0) {
-			return userComp.viewParts();
+			return partDAO.findAll(pg).getContent();
 		} else if (query.isEmpty()) {
 			Type t = typeDAO.findOne(type);
-			return partDAO.findByType(t);
+			return partDAO.findByType(t, pg).getContent();
 		} else if (type == 0) {
-			return partDAO.findByNameLike("%"+query+"%");
-		}
+			return partDAO.findByNameLike("%"+query+"%", pg).getContent();
+		} 
+		
 		Type t = typeDAO.findOne(type);
-		return partDAO.findByTypeAndNameLike(t, "%"+query+"%");
+		return partDAO.findByTypeAndNameLike(t, "%"+query+"%", pg).getContent();
 	}
 	
 	@GET

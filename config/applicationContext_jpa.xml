@@ -84,6 +84,8 @@
         <property name="validationQuery" value="SELECT 1"/>
     </bean>
 
+	<bean id="hibernateJpaAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+
     <!-- CONFIGURE ENTITY MANAGEMENT -->
     <bean class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" 
     	  id="entityManagerFactory"
@@ -92,7 +94,8 @@
         
         <!-- The unit name is inside the persistence XML file -->
         <property name="persistenceXmlLocation" value="classpath*:persistence.xml" />
-        <property name="persistenceUnitName" value="persistenceUnit"/>        
+        <property name="persistenceUnitName" value="persistenceUnit"/>
+        <property name="jpaVendorAdapter" ref="hibernateJpaAdapter" />        
     </bean>
 
     <!-- SPRING DATA JPA REPOSITORY SUPPORT -->
