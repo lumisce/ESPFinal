@@ -52,7 +52,7 @@ public class UsersController extends AppController {
 	@POST
 	@Path("/register")			// similar to /admin/register and /seller/register
 	public Response register(@FormParam("username") String username, @FormParam("email") String email, 
-			@FormParam("password") String password, @FormParam("confirm_password") String confPassword, 
+			@FormParam("password") String password, @FormParam("phone") String phone, @FormParam("confirm_password") String confPassword, 
 			@FormParam("is_seller") boolean isSeller, @FormParam("is_admin") boolean isAdmin,
 			@Context HttpServletRequest req) {
 		
@@ -62,7 +62,7 @@ public class UsersController extends AppController {
 		}
 		isSeller = true;
 		isAdmin = false;
-		userComp.create(username, email, password, isSeller, isAdmin);
+		userComp.create(username, email, phone, password, isSeller, isAdmin);
 //		userComp.setSession(req, username);
 		return Response.ok().build();
 	}

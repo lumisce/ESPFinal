@@ -41,6 +41,9 @@ public class User {
 	@Column(length=60)
 	private String hashedPassword;
 	
+	@Column
+	private String phoneNumber;
+	
 	@JsonIgnore
 	@Column
 	private boolean isSeller;
@@ -134,5 +137,13 @@ public class User {
 
 	public void setCreated(String created) {
 		this.created = created;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 }

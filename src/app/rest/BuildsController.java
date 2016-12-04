@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import app.components.BuildComponent;
+import app.components.ChikkaClient;
 import app.components.UserComponent;
 import app.entities.Build;
 import app.entities.BuildPart;
@@ -46,6 +47,9 @@ public class BuildsController extends AppController{
 	@Autowired
 	BuildPartRepository bpDAO;
 	
+	@Autowired
+	ChikkaClient chikka;
+	
 	@POST
 	@Path("/new")
 	public Response createBuild(@PathParam("username") String username, @FormParam("name") String name, @Context HttpServletRequest req) {
@@ -68,7 +72,24 @@ public class BuildsController extends AppController{
 		return Response.ok().entity(b).build();
 	}
 	
-	
+	@POST
+	@Path("/{build}/sendText")
+	public Response textBuild(@PathParam("username") String username, @PathParam("build") Long build) {
+		String phone = userComp.find(username).getPhoneNumber();
+		Build b = buildComp.find(build);
+		if (!username.equals(b.getUser().getUsername())) {
+			throw new WebApplicationException(404);
+		}
+		b.setCreated(formatDate(b.getCreatedAt()));
+		b.setUsername(b.getUser().getUsername());
+		b.setbParts(bpDAO.findByBuild(b));
+		String message = "Build: "+b.getName()+"\ncreated by: "+b.getUsername()+"\nParts:";
+		for (BuildPart bp : b.getbParts()) {
+			message += "\n"+bp.getPart().getName()+" (" + bp.getPart().getPrice() +")";
+		}
+		chikka.sendMessage(phone, message);
+		return Response.ok().build();
+	}
 	
 	@POST
 	@Path("/{build}/edit")

@@ -75,10 +75,11 @@ public class UserComponent {
 		return errors;
 	}
 	
-	public void create(String username, String email, String password, boolean isSeller, boolean isAdmin) {
+	public void create(String username, String email, String phone, String password, boolean isSeller, boolean isAdmin) {
 		User user = new User();
 		user.setUsername(username);
 		user.setEmail(email);
+		user.setPhoneNumber(phone);
 		user.setSeller(isSeller);
 		user.setAdmin(isAdmin);
 		user.setHashedPassword(passEncoder.encode(password));
