@@ -97,7 +97,7 @@ public class PopulateDB
         		if (errors.size() > 0) {
         			System.out.println(errors.toString());
         		}
-        		userComp.create(user[0], user[2], user[1], true, user[3].equals("TRUE")? true : false);
+        		userComp.create(user[0], user[2], user[1], "", true, user[3].equals("TRUE")? true : false);
         		
                 }
                 catch(ArrayIndexOutOfBoundsException exception) {
